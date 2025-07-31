@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { User, AuthContextType, LoginForm, RegisterForm } from '@/types'
+import { User, AuthContextType, RegisterForm } from '@/types'
 import { authService } from '@/services/authService'
 import toast from 'react-hot-toast'
 

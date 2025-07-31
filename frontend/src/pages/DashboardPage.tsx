@@ -150,7 +150,7 @@ const DashboardPage = () => {
             {applications.length > 0 ? (
               <div className="space-y-4">
                 {applications.map((application) => (
-                  <ApplicationCard key={application.id} application={application} />
+                  <ApplicationCard key={application.id || application._id} application={application} />
                 ))}
               </div>
             ) : (

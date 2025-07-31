@@ -1,6 +1,7 @@
 // User types
 export interface User {
   _id: string;
+  id?: string; // Add id as optional for compatibility
   name: string;
   email: string;
   role: 'jobseeker' | 'employer' | 'admin';
@@ -18,6 +19,7 @@ export interface User {
 // Job types
 export interface Job {
   _id: string;
+  id?: string; // Add id as optional for compatibility
   title: string;
   company: string;
   location: string;
@@ -29,23 +31,27 @@ export interface Job {
     min: number;
     max: number;
     currency: string;
-  };
+  } | string; // Allow string for compatibility
   benefits?: string[];
-  postedBy: User;
+  postedBy: User | string; // Allow string for compatibility
   isActive: boolean;
   applications: string[];
   createdAt: string;
   updatedAt: string;
+  postedAt?: string; // Add postedAt for compatibility
 }
 
 // Application types
 export interface Application {
   _id: string;
+  id?: string; // Add id as optional for compatibility
   jobId: string;
   userId: string;
+  jobTitle?: string; // Add jobTitle for compatibility
+  company?: string; // Add company for compatibility
   coverLetter: string;
   resume: string;
-  status: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'hired';
+  status: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'hired' | 'interviewed'; // Add interviewed
   appliedAt: string;
   updatedAt: string;
 }

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Job, Application, ApiResponse } from '@/types'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+const API_BASE_URL = process.env.VITE_API_URL || '/api'
 
 // Create axios instance with default config
 const api = axios.create({
@@ -35,103 +35,135 @@ api.interceptors.response.use(
 // Sample data for development
 const sampleJobs: Job[] = [
   {
+    _id: '1',
     id: '1',
     title: 'Senior React Developer',
     company: 'TechCorp Inc.',
     location: 'San Francisco, CA',
-    type: 'Full-time',
+    category: 'Technology',
+    type: 'full-time',
     salary: '$120,000 - $150,000',
     description: 'We are looking for a senior React developer to join our team...',
     requirements: ['React', 'TypeScript', 'Node.js', '5+ years experience'],
     postedAt: '2025-07-30T10:00:00Z',
+    createdAt: '2025-07-30T10:00:00Z',
+    updatedAt: '2025-07-30T10:00:00Z',
     postedBy: 'employer1',
     applications: [],
-    status: 'active'
+    isActive: true
   },
   {
+    _id: '2',
     id: '2',
     title: 'Frontend Engineer',
     company: 'StartupXYZ',
     location: 'Remote',
-    type: 'Full-time',
+    category: 'Technology',
+    type: 'full-time',
     salary: '$90,000 - $110,000',
     description: 'Join our fast-growing startup as a frontend engineer...',
     requirements: ['JavaScript', 'React', 'CSS', '3+ years experience'],
     postedAt: '2025-07-29T14:30:00Z',
+    createdAt: '2025-07-29T14:30:00Z',
+    updatedAt: '2025-07-29T14:30:00Z',
     postedBy: 'employer2',
     applications: [],
-    status: 'active'
+    isActive: true
   },
   {
+    _id: '3',
     id: '3',
     title: 'UI/UX Designer',
     company: 'Design Studio Pro',
     location: 'New York, NY',
-    type: 'Contract',
+    category: 'Design',
+    type: 'contract',
     salary: '$80,000 - $100,000',
     description: 'Creative UI/UX designer needed for exciting projects...',
     requirements: ['Figma', 'Adobe Creative Suite', 'User Research', '4+ years experience'],
     postedAt: '2025-07-28T09:15:00Z',
+    createdAt: '2025-07-28T09:15:00Z',
+    updatedAt: '2025-07-28T09:15:00Z',
     postedBy: 'employer3',
     applications: [],
-    status: 'active'
+    isActive: true
   },
   {
+    _id: '4',
     id: '4',
     title: 'DevOps Engineer',
     company: 'CloudTech Solutions',
     location: 'Austin, TX',
-    type: 'Full-time',
+    category: 'Technology',
+    type: 'full-time',
     salary: '$110,000 - $130,000',
     description: 'DevOps engineer to manage our cloud infrastructure...',
     requirements: ['AWS', 'Docker', 'Kubernetes', 'CI/CD', '4+ years experience'],
     postedAt: '2025-07-27T16:45:00Z',
+    createdAt: '2025-07-27T16:45:00Z',
+    updatedAt: '2025-07-27T16:45:00Z',
     postedBy: 'employer4',
     applications: [],
-    status: 'active'
+    isActive: true
   },
   {
+    _id: '5',
     id: '5',
     title: 'Product Manager',
     company: 'Innovation Labs',
     location: 'Seattle, WA',
-    type: 'Full-time',
+    category: 'Other',
+    type: 'full-time',
     salary: '$130,000 - $160,000',
     description: 'Lead product strategy and development for our platform...',
     requirements: ['Product Strategy', 'Agile', 'Data Analysis', '6+ years experience'],
     postedAt: '2025-07-26T11:20:00Z',
+    createdAt: '2025-07-26T11:20:00Z',
+    updatedAt: '2025-07-26T11:20:00Z',
     postedBy: 'employer5',
     applications: [],
-    status: 'active'
+    isActive: true
   }
 ]
 
 const sampleApplications: Application[] = [
   {
+    _id: '1',
     id: '1',
     jobId: '1',
+    userId: 'user1',
     jobTitle: 'Senior React Developer',
     company: 'TechCorp Inc.',
     appliedAt: '2025-07-30T15:30:00Z',
+    updatedAt: '2025-07-30T15:30:00Z',
     status: 'pending',
+    coverLetter: 'I am excited to apply for this position...',
     resume: 'resume-senior-react.pdf'
   },
   {
+    _id: '2',
     id: '2',
     jobId: '2',
+    userId: 'user1',
     jobTitle: 'Frontend Engineer',
     company: 'StartupXYZ',
     appliedAt: '2025-07-29T10:15:00Z',
+    updatedAt: '2025-07-29T10:15:00Z',
     status: 'reviewed',
+    coverLetter: 'I am excited to apply for this position...',
     resume: 'resume-frontend.pdf'
   },
   {
+    _id: '3',
     id: '3',
     jobId: '3',
+    userId: 'user1',
     jobTitle: 'UI/UX Designer',
     company: 'Design Studio Pro',
     appliedAt: '2025-07-28T14:45:00Z',
+    updatedAt: '2025-07-28T14:45:00Z',
     status: 'interviewed',
+    coverLetter: 'I am excited to apply for this position...',
     resume: 'resume-uiux.pdf'
   }
 ]
@@ -160,7 +192,7 @@ export const jobService = {
       return response.data.data!
     } catch (error) {
       console.log('Using sample data for job')
-      const job = sampleJobs.find(j => j.id === id)
+      const job = sampleJobs.find(j => j.id === id || j._id === id)
       if (!job) throw new Error('Job not found')
       return job
     }
@@ -185,7 +217,7 @@ export const jobService = {
     } catch (error) {
       console.log('Using sample data for saved jobs')
       const savedJobIds = sampleSavedJobs.map(sj => sj.jobId)
-      return sampleJobs.filter(job => savedJobIds.includes(job.id))
+      return sampleJobs.filter(job => savedJobIds.includes(job.id || job._id))
     }
   },
 

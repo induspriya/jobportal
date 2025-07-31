@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
-import { Search, Briefcase, Users, TrendingUp, ArrowRight, CheckCircle } from 'lucide-react'
+import { Search, Briefcase, Users, TrendingUp, ArrowRight } from 'lucide-react'
 
 const HomePage = () => {
   return (

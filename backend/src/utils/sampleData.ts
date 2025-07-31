@@ -62,7 +62,7 @@ export const sampleJobs = [
     salary: '$130,000 - $160,000',
     description: 'Lead product strategy and development for our platform. You will work closely with engineering, design, and business teams to deliver exceptional products.',
     requirements: ['Product Strategy', 'Agile', 'Data Analysis', '6+ years experience', 'Leadership'],
-    category: 'Business',
+    category: 'Other',
     postedBy: 'employer5',
     applications: [],
     status: 'active'

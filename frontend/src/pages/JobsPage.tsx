@@ -27,7 +27,7 @@ const JobsPage = () => {
     'Other'
   ]
 
-  const jobTypes = ['full-time', 'part-time', 'contract', 'internship']
+  const jobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship']
 
   useEffect(() => {
     const loadJobs = async () => {

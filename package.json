@@ -1,0 +1,35 @@
+{
+  "name": "job-portal",
+  "version": "1.0.0",
+  "description": "A modern job portal application with user authentication and job search capabilities",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && npm run test",
+    "test:frontend": "cd frontend && npm run test",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "job-portal",
+    "mern-stack",
+    "typescript",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "Job Portal Team",
+  "license": "MIT"
+} 

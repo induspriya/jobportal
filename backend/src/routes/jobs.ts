@@ -1,0 +1,339 @@
+import express from 'express';
+import { body, query, validationResult } from 'express-validator';
+import { Job } from '../models/Job';
+import { protect, authorize } from '../middleware/auth';
+import { AuthRequest } from '../types';
+
+const router = express.Router();
+
+// @route   GET /api/jobs
+// @desc    Get all jobs with filters
+// @access  Public
+router.get('/', [
+  query('search').optional().trim(),
+  query('category').optional().trim(),
+  query('location').optional().trim(),
+  query('type').optional().trim(),
+  query('minSalary').optional().isNumeric(),
+  query('maxSalary').optional().isNumeric(),
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 50 })
+], async (req, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const {
+      search,
+      category,
+      location,
+      type,
+      minSalary,
+      maxSalary,
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    // Build query
+    const query: any = { isActive: true };
+
+    if (search) {
+      query.$text = { $search: search as string };
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (location) {
+      query.location = { $regex: location, $options: 'i' };
+    }
+
+    if (type) {
+      query.type = type;
+    }
+
+    if (minSalary || maxSalary) {
+      query.salary = {};
+      if (minSalary) query.salary.$gte = parseInt(minSalary as string);
+      if (maxSalary) query.salary.$lte = parseInt(maxSalary as string);
+    }
+
+    // Calculate pagination
+    const skip = (parseInt(page as string) - 1) * parseInt(limit as string);
+
+    // Execute query
+    const jobs = await Job.find(query)
+      .populate('postedBy', 'name company')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit as string));
+
+    // Get total count for pagination
+    const total = await Job.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: {
+        jobs,
+        pagination: {
+          currentPage: parseInt(page as string),
+          totalPages: Math.ceil(total / parseInt(limit as string)),
+          totalJobs: total,
+          hasNextPage: skip + jobs.length < total,
+          hasPrevPage: parseInt(page as string) > 1
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get jobs error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching jobs'
+    });
+  }
+});
+
+// @route   GET /api/jobs/:id
+// @desc    Get single job by ID
+// @access  Public
+router.get('/:id', async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id)
+      .populate('postedBy', 'name company location')
+      .populate('applications');
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { job }
+    });
+  } catch (error) {
+    console.error('Get job error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching job'
+    });
+  }
+});
+
+// @route   POST /api/jobs
+// @desc    Create a new job
+// @access  Private (Employers only)
+router.post('/', protect, authorize('employer', 'admin'), [
+  body('title').trim().isLength({ min: 3, max: 100 }).withMessage('Title must be between 3 and 100 characters'),
+  body('company').trim().isLength({ min: 2, max: 100 }).withMessage('Company must be between 2 and 100 characters'),
+  body('location').trim().isLength({ min: 2, max: 100 }).withMessage('Location must be between 2 and 100 characters'),
+  body('category').isIn([
+    'Technology', 'Healthcare', 'Finance', 'Education', 'Marketing',
+    'Sales', 'Design', 'Engineering', 'Customer Service', 'Administration', 'Other'
+  ]).withMessage('Invalid category'),
+  body('type').isIn(['full-time', 'part-time', 'contract', 'internship']).withMessage('Invalid job type'),
+  body('description').trim().isLength({ min: 50, max: 5000 }).withMessage('Description must be between 50 and 5000 characters'),
+  body('requirements').isArray().withMessage('Requirements must be an array'),
+  body('salary.min').optional().isNumeric().withMessage('Minimum salary must be a number'),
+  body('salary.max').optional().isNumeric().withMessage('Maximum salary must be a number'),
+  body('benefits').optional().isArray().withMessage('Benefits must be an array')
+], async (req: AuthRequest, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const jobData = {
+      ...req.body,
+      postedBy: req.user!._id
+    };
+
+    const job = await Job.create(jobData);
+
+    res.status(201).json({
+      success: true,
+      message: 'Job created successfully',
+      data: { job }
+    });
+  } catch (error) {
+    console.error('Create job error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while creating job'
+    });
+  }
+});
+
+// @route   PUT /api/jobs/:id
+// @desc    Update a job
+// @access  Private (Job poster or admin only)
+router.put('/:id', protect, [
+  body('title').optional().trim().isLength({ min: 3, max: 100 }).withMessage('Title must be between 3 and 100 characters'),
+  body('company').optional().trim().isLength({ min: 2, max: 100 }).withMessage('Company must be between 2 and 100 characters'),
+  body('location').optional().trim().isLength({ min: 2, max: 100 }).withMessage('Location must be between 2 and 100 characters'),
+  body('category').optional().isIn([
+    'Technology', 'Healthcare', 'Finance', 'Education', 'Marketing',
+    'Sales', 'Design', 'Engineering', 'Customer Service', 'Administration', 'Other'
+  ]).withMessage('Invalid category'),
+  body('type').optional().isIn(['full-time', 'part-time', 'contract', 'internship']).withMessage('Invalid job type'),
+  body('description').optional().trim().isLength({ min: 50, max: 5000 }).withMessage('Description must be between 50 and 5000 characters'),
+  body('requirements').optional().isArray().withMessage('Requirements must be an array'),
+  body('salary.min').optional().isNumeric().withMessage('Minimum salary must be a number'),
+  body('salary.max').optional().isNumeric().withMessage('Maximum salary must be a number'),
+  body('benefits').optional().isArray().withMessage('Benefits must be an array'),
+  body('isActive').optional().isBoolean().withMessage('isActive must be a boolean')
+], async (req: AuthRequest, res) => {
+  try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job not found'
+      });
+    }
+
+    // Check if user is authorized to update this job
+    if (job.postedBy.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this job'
+      });
+    }
+
+    // Update job
+    Object.keys(req.body).forEach(key => {
+      (job as any)[key] = req.body[key];
+    });
+
+    await job.save();
+
+    res.json({
+      success: true,
+      message: 'Job updated successfully',
+      data: { job }
+    });
+  } catch (error) {
+    console.error('Update job error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating job'
+    });
+  }
+});
+
+// @route   DELETE /api/jobs/:id
+// @desc    Delete a job
+// @access  Private (Job poster or admin only)
+router.delete('/:id', protect, async (req: AuthRequest, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job not found'
+      });
+    }
+
+    // Check if user is authorized to delete this job
+    if (job.postedBy.toString() !== req.user!._id.toString() && req.user!.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this job'
+      });
+    }
+
+    await job.deleteOne();
+
+    res.json({
+      success: true,
+      message: 'Job deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete job error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while deleting job'
+    });
+  }
+});
+
+// @route   GET /api/jobs/categories
+// @desc    Get all job categories
+// @access  Public
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = [
+      'Technology',
+      'Healthcare',
+      'Finance',
+      'Education',
+      'Marketing',
+      'Sales',
+      'Design',
+      'Engineering',
+      'Customer Service',
+      'Administration',
+      'Other'
+    ];
+
+    res.json({
+      success: true,
+      data: { categories }
+    });
+  } catch (error) {
+    console.error('Get categories error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching categories'
+    });
+  }
+});
+
+// @route   GET /api/jobs/my-jobs
+// @desc    Get jobs posted by current user
+// @access  Private (Employers only)
+router.get('/my-jobs', protect, authorize('employer', 'admin'), async (req: AuthRequest, res) => {
+  try {
+    const jobs = await Job.find({ postedBy: req.user!._id })
+      .populate('applications')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: { jobs }
+    });
+  } catch (error) {
+    console.error('Get my jobs error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching your jobs'
+    });
+  }
+});
+
+export default router; 

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Building, Clock, DollarSign, Calendar } from 'lucide-react'
+import { MapPin, Building, DollarSign, Calendar } from 'lucide-react'
 import { Job } from '@/types'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -27,12 +27,25 @@ const JobCard = ({ job }: JobCardProps) => {
     return formatDistanceToNow(new Date(dateString), { addSuffix: true })
   }
 
+  const formatSalary = (salary: any) => {
+    if (typeof salary === 'string') {
+      return salary
+    }
+    if (salary && typeof salary === 'object' && salary.min && salary.max) {
+      return `${salary.currency}${salary.min.toLocaleString()} - ${salary.currency}${salary.max.toLocaleString()}`
+    }
+    return 'Salary not specified'
+  }
+
+  const jobId = job.id || job._id
+  const postedDate = job.postedAt || job.createdAt
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
           <Link
-            to={`/jobs/${job.id}`}
+            to={`/jobs/${jobId}`}
             className="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors"
           >
             {job.title}
@@ -77,17 +90,17 @@ const JobCard = ({ job }: JobCardProps) => {
           {job.salary && (
             <div className="flex items-center">
               <DollarSign className="w-4 h-4 mr-1" />
-              <span>{job.salary}</span>
+              <span>{formatSalary(job.salary)}</span>
             </div>
           )}
           <div className="flex items-center">
             <Calendar className="w-4 h-4 mr-1" />
-            <span>{formatDate(job.postedAt)}</span>
+            <span>{formatDate(postedDate)}</span>
           </div>
         </div>
 
         <Link
-          to={`/jobs/${job.id}`}
+          to={`/jobs/${jobId}`}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
         >
           View Details

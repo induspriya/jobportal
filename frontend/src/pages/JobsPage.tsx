@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { Search, Filter, MapPin, Briefcase, DollarSign } from 'lucide-react'
+import { Search, Filter, MapPin, Briefcase } from 'lucide-react'
 import { jobService } from '@/services/jobService'
 import JobCard from '@/components/JobCard'
 import { Job } from '@/types'
@@ -163,7 +163,7 @@ const JobsPage = () => {
           ) : (
             <div className="space-y-4">
               {filteredJobs.map(job => (
-                <JobCard key={job.id} job={job} />
+                <JobCard key={job.id || job._id} job={job} />
               ))}
             </div>
           )}

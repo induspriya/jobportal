@@ -10,8 +10,7 @@ const passwordResetTokenSchema = new Schema<PasswordResetTokenDocument>({
   },
   token: {
     type: String,
-    required: [true, 'Token is required'],
-    unique: true
+    required: [true, 'Token is required']
   },
   expiresAt: {
     type: Date,
@@ -25,11 +24,8 @@ const passwordResetTokenSchema = new Schema<PasswordResetTokenDocument>({
 });
 
 // Index for token lookups
-passwordResetTokenSchema.index({ token: 1 });
+passwordResetTokenSchema.index({ token: 1 }, { unique: true });
 passwordResetTokenSchema.index({ userId: 1 });
-passwordResetTokenSchema.index({ expiresAt: 1 });
-
-// Clean up expired tokens
 passwordResetTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // Static method to create a new reset token

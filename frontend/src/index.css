@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom CSS Variables for Error Pages */
+:root {
+    --background-color: rgb(246, 246, 246);
+    --text-color: rgb(133, 133, 133);
+    --link-color: rgb(21, 126, 251);
+    --svg-fill-color: rgb(125, 127, 127);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: rgb(30, 30, 30);
+    }
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground;
@@ -103,5 +117,74 @@
     50% {
       transform: translateY(-20px);
     }
+  }
+  
+  /* Error Page Styles */
+  .error-page {
+    background: var(--background-color);
+    cursor: default;
+    display: -webkit-box;
+    text-align: center;
+    -webkit-box-align: center;
+    -webkit-box-pack: center;
+    -webkit-user-select: none;
+    min-height: 100vh;
+  }
+  
+  .error-page a {
+    color: var(--link-color);
+    text-decoration: none;
+  }
+  
+  .error-page input {
+    font-size: 13px;
+  }
+  
+  .error-content-container {
+    min-width: 320px;
+    max-width: 580px;
+    margin: 0 auto;
+    position: relative;
+    width: 50%;
+  }
+  
+  .error-title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 34px;
+    margin: 0 auto;
+  }
+  
+  .error-message, .suggestion-prompt {
+    font-size: 13px;
+    line-height: 18px;
+    padding: 0px 24px;
+  }
+  
+  .suggestion-form {
+    display: inline-block;
+    margin: 5px;
+  }
+  
+  .suggestion-form input {
+    margin: 0;
+    min-width: 146px;
+  }
+  
+  .error-text-container {
+    color: var(--text-color);
+    position: relative;
+    width: 100%;
+    word-wrap: break-word;
+  }
+  
+  .error-image-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .error-page svg {
+    margin: 13px 0;
+    fill: var(--svg-fill-color);
   }
 } 

@@ -11,6 +11,7 @@ import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
 import jobRoutes from './routes/jobs';
 import userRoutes from './routes/users';
+import adminRoutes from './routes/admin';
 import { populateSampleData } from './utils/sampleData';
 
 // Load environment variables
@@ -63,6 +64,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

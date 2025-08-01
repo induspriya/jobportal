@@ -4,7 +4,7 @@
 
 This error occurs when Vercel cannot find the build output directory after the build process completes.
 
-## ✅ **Solution: Updated Configuration**
+## ✅ **Solution: Updated Configuration with Build Script**
 
 ### **1. Updated `vercel.json`**
 ```json
@@ -12,11 +12,11 @@ This error occurs when Vercel cannot find the build output directory after the b
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "buildCommand": "npm run build"
+        "distDir": "frontend/dist",
+        "buildCommand": "./build.sh"
       }
     },
     {
@@ -33,34 +33,53 @@ This error occurs when Vercel cannot find the build output directory after the b
       "source": "/(.*)",
       "destination": "/frontend/dist/index.html"
     }
-  ],
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist"
+  ]
 }
 ```
 
-### **2. Added `.vercelignore`**
-Excludes unnecessary files from deployment to reduce build time and size.
+### **2. Added `build.sh` Script**
+A reliable build script that handles the entire build process:
+```bash
+#!/bin/bash
+echo "🚀 Starting Vercel build process..."
+cd frontend
+npm install
+npm run build
+# Verify build output
+if [ -d "dist" ]; then
+    echo "✅ Frontend dist directory created successfully"
+else
+    echo "❌ Frontend dist directory not found"
+    exit 1
+fi
+```
 
-### **3. Verified Build Process**
-- ✅ Frontend builds successfully
-- ✅ `dist` directory is created
-- ✅ All assets are properly generated
+### **3. Updated Root `package.json`**
+Added proper build scripts:
+```json
+{
+  "scripts": {
+    "build": "npm run build:frontend",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "vercel-build": "cd frontend && npm install && npm run build"
+  }
+}
+```
+
+### **4. Added `.vercelignore`**
+Excludes unnecessary files from deployment.
 
 ## 🔧 **Manual Verification Steps**
 
 ### **Test Build Locally:**
 ```bash
-# Navigate to frontend directory
+# Test the build script
+./build.sh
+
+# Or test manually
 cd frontend
-
-# Install dependencies
 npm install
-
-# Run build
 npm run build
-
-# Verify dist directory exists
 ls -la dist/
 ```
 
@@ -87,7 +106,7 @@ dist/
 ### **2. Configure Build Settings**
 - **Framework Preset**: Other
 - **Root Directory**: `./` (root of repository)
-- **Build Command**: `cd frontend && npm install && npm run build`
+- **Build Command**: `./build.sh` (or leave empty to use vercel.json)
 - **Output Directory**: `frontend/dist`
 
 ### **3. Set Environment Variables**
@@ -129,20 +148,18 @@ Click "Deploy" and wait for the build to complete.
    - Look for specific error messages in Vercel build logs
    - Verify all dependencies are installed
 
-2. **Verify Package.json**
+2. **Alternative Build Command**
+   - Try using: `cd frontend && npm install && npm run build`
+   - Or use the root package.json build script
+
+3. **Verify Package.json**
    - Ensure `build` script exists in `frontend/package.json`
    - Check that all dependencies are listed
 
-3. **Test Locally First**
+4. **Test Locally First**
    ```bash
-   cd frontend
-   npm install
-   npm run build
+   ./build.sh
    ```
-
-4. **Check Vite Config**
-   - Ensure `vite.config.ts` is properly configured
-   - Verify build output directory is set to `dist`
 
 ### **Common Issues:**
 
@@ -157,6 +174,9 @@ Click "Deploy" and wait for the build to complete.
 
 4. **Environment Variables**
    - Solution: Set all required environment variables in Vercel
+
+5. **Build Script Permissions**
+   - Solution: Ensure `build.sh` is executable (`chmod +x build.sh`)
 
 ## ✅ **Success Indicators**
 
@@ -184,7 +204,7 @@ If you continue to experience issues:
 
 1. Check the build logs in Vercel dashboard
 2. Verify all environment variables are set
-3. Test the build process locally
+3. Test the build process locally using `./build.sh`
 4. Review the updated configuration files
 
 **Your job portal should now deploy successfully on Vercel!** 🎉 

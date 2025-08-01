@@ -44,7 +44,10 @@ if (process.env.NODE_ENV === 'production') {
     'https://jobportal-frontend.vercel.app',
     'https://jobportal.vercel.app',
     'https://job-portal-frontend.vercel.app',
-    'https://job-portal.vercel.app'
+    'https://job-portal.vercel.app',
+    // Add any other Vercel domains you might have
+    'https://*.vercel.app',
+    'https://*.vercel.app/*'
   );
 }
 
@@ -52,6 +55,11 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    
+    // Allow all Vercel domains in production
+    if (process.env.NODE_ENV === 'production' && origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
@@ -90,6 +98,16 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     message: 'Job Portal API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV,
+    cors: allowedOrigins
+  });
+});
+
+// Simple test endpoint
+app.get('/api/test', (req, res) => {
+  res.status(200).json({ 
+    message: 'API is working!',
     timestamp: new Date().toISOString()
   });
 });

@@ -24,18 +24,41 @@ const PORT = process.env.PORT || 5001;
 app.use(helmet());
 
 // CORS configuration
-app.use(cors({
-  origin: [
-    'http://localhost:3000', 
-    'http://localhost:3001', 
-    'http://localhost:3002', 
-    'http://localhost:3003', 
-    'http://localhost:3004',
-    // Add your deployed frontend URL here
-    'https://your-frontend-domain.vercel.app',
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://localhost:3001', 
+  'http://localhost:3002', 
+  'http://localhost:3003', 
+  'http://localhost:3004'
+];
+
+// Add production URLs from environment variables
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
+// Add common Vercel deployment patterns
+if (process.env.NODE_ENV === 'production') {
+  allowedOrigins.push(
     'https://jobportal-frontend.vercel.app',
-    'https://jobportal.vercel.app'
-  ],
+    'https://jobportal.vercel.app',
+    'https://job-portal-frontend.vercel.app',
+    'https://job-portal.vercel.app'
+  );
+}
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 

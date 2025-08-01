@@ -232,12 +232,31 @@ npm test
 
 ## 📦 Deployment
 
-### Backend Deployment
+### 🚀 Vercel Deployment (Recommended)
+
+This application is configured for easy deployment on Vercel. See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed instructions.
+
+#### Quick Setup:
+1. **Connect to Vercel**: Import your GitHub repository
+2. **Set Environment Variables**: Configure MongoDB, JWT, and other settings
+3. **Deploy**: Vercel automatically builds and deploys both frontend and backend
+
+#### Required Environment Variables:
+```env
+MONGODB_URI=mongodb+srv://your-username:your-password@your-cluster.mongodb.net/job-portal
+JWT_SECRET=your-super-secret-jwt-key
+NODE_ENV=production
+FRONTEND_URL=https://your-frontend-domain.vercel.app
+```
+
+### Alternative Deployment Options
+
+#### Backend Deployment
 1. Set up environment variables for production
 2. Build the application: `npm run build`
 3. Deploy to your preferred platform (Heroku, DigitalOcean, AWS, etc.)
 
-### Frontend Deployment
+#### Frontend Deployment
 1. Build the application: `npm run build`
 2. Deploy the `dist` folder to Vercel, Netlify, or your preferred hosting platform
 

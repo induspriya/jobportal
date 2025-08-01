@@ -100,7 +100,8 @@ app.get('/api/health', (req, res) => {
     message: 'Job Portal API is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    cors: allowedOrigins
+    cors: allowedOrigins,
+    vercel: true
   });
 });
 
@@ -108,6 +109,16 @@ app.get('/api/health', (req, res) => {
 app.get('/api/test', (req, res) => {
   res.status(200).json({ 
     message: 'API is working!',
+    timestamp: new Date().toISOString(),
+    vercel: true
+  });
+});
+
+// Root endpoint for Vercel
+app.get('/', (req, res) => {
+  res.status(200).json({ 
+    message: 'Job Portal Backend API',
+    status: 'running',
     timestamp: new Date().toISOString()
   });
 });

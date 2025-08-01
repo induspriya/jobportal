@@ -25,7 +25,17 @@ app.use(helmet());
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'],
+  origin: [
+    'http://localhost:3000', 
+    'http://localhost:3001', 
+    'http://localhost:3002', 
+    'http://localhost:3003', 
+    'http://localhost:3004',
+    // Add your deployed frontend URL here
+    'https://your-frontend-domain.vercel.app',
+    'https://jobportal-frontend.vercel.app',
+    'https://jobportal.vercel.app'
+  ],
   credentials: true
 }));
 
@@ -88,17 +98,28 @@ const startServer = async () => {
       await populateSampleData();
     }
     
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+    // In production (Vercel), don't call app.listen()
+    if (process.env.NODE_ENV === 'production') {
+      console.log(`🚀 Server ready for production`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🔗 API URL: http://localhost:${PORT}/api`);
-    });
+      console.log(`🔗 API URL: /api`);
+    } else {
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+        console.log(`🔗 API URL: http://localhost:${PORT}/api`);
+      });
+    }
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };
 
-startServer();
+// Export for Vercel
+export default app;
 
-export default app; 
+// Start server if not in production
+if (process.env.NODE_ENV !== 'production') {
+  startServer();
+} 

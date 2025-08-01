@@ -1,6 +1,8 @@
 import axios from 'axios'
 import { User, LoginForm, RegisterForm, ApiResponse } from '@/types'
 
+// Use relative URL for production (works with Vercel rewrites)
+// Use environment variable for development
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 // Create axios instance with default config

@@ -16,14 +16,14 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/src/index.ts"
+      "source": "/api/(.*)",
+      "destination": "/backend/src/index.ts"
     },
     {
-      "src": "/(.*)",
-      "dest": "frontend/dist/$1"
+      "source": "/(.*)",
+      "destination": "/frontend/dist/$1"
     }
   ],
   "env": {

@@ -6,7 +6,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 
-import { connectDB } from '../backend/src/config/database';
+import mongoose from 'mongoose';
 import { errorHandler } from '../backend/src/middleware/errorHandler';
 import authRoutes from '../backend/src/routes/auth';
 import jobRoutes from '../backend/src/routes/jobs';
@@ -123,11 +123,26 @@ let isConnected = false;
 const connectToDB = async () => {
   if (!isConnected) {
     try {
-      await connectDB();
+      const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/job-portal';
+      
+      console.log('🔗 Attempting to connect to MongoDB...');
+      console.log('📍 URI:', mongoURI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')); // Hide credentials in logs
+      
+      await mongoose.connect(mongoURI, {
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000
+      });
+      
       isConnected = true;
       console.log('✅ MongoDB connected successfully');
     } catch (error) {
       console.error('❌ MongoDB connection failed:', error);
+      console.error('🔍 Error details:', {
+        name: error.name,
+        message: error.message,
+        code: error.code
+      });
     }
   }
 };

@@ -40,6 +40,7 @@ if (process.env.FRONTEND_URL) {
 // Add common Vercel deployment patterns
 if (process.env.NODE_ENV === 'production') {
   allowedOrigins.push(
+    'https://jobportal-frontend-9dny-2a66n0l7j-induspriyas-projects.vercel.app',
     'https://jobportal-frontend.vercel.app',
     'https://jobportal.vercel.app',
     'https://job-portal-frontend.vercel.app',

@@ -4,7 +4,16 @@ export const connectDB = async (): Promise<void> => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/job-portal';
     
-    await mongoose.connect(mongoURI);
+    console.log('🔗 Attempting to connect to MongoDB...');
+    console.log('📍 URI:', mongoURI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')); // Hide credentials in logs
+    
+    await mongoose.connect(mongoURI, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      bufferCommands: false,
+      bufferMaxEntries: 0
+    });
     
     console.log('✅ MongoDB connected successfully');
     
@@ -26,6 +35,11 @@ export const connectDB = async (): Promise<void> => {
     
   } catch (error) {
     console.error('❌ Failed to connect to MongoDB:', error);
+    console.error('🔍 Error details:', {
+      name: error.name,
+      message: error.message,
+      code: error.code
+    });
     process.exit(1);
   }
 }; 

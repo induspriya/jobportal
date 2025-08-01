@@ -11,7 +11,6 @@ import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth';
 import jobRoutes from './routes/jobs';
 import userRoutes from './routes/users';
-import adminRoutes from './routes/admin';
 import { populateSampleData } from './utils/sampleData';
 
 // Load environment variables
@@ -20,54 +19,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Trust proxy for Vercel
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 
 // CORS configuration
-const allowedOrigins = [
-  'http://localhost:3000', 
-  'http://localhost:3001', 
-  'http://localhost:3002', 
-  'http://localhost:3003', 
-  'http://localhost:3004'
-];
-
-// Add production URLs from environment variables
-if (process.env.FRONTEND_URL) {
-  allowedOrigins.push(process.env.FRONTEND_URL);
-}
-
-// Add common Vercel deployment patterns
-if (process.env.NODE_ENV === 'production') {
-  allowedOrigins.push(
-    'https://jobportal-frontend-9dny-2a66n0l7j-induspriyas-projects.vercel.app',
-    'https://jobportal-frontend.vercel.app',
-    'https://jobportal.vercel.app',
-    'https://job-portal-frontend.vercel.app',
-    'https://job-portal.vercel.app',
-    // Add any other Vercel domains you might have
-    'https://*.vercel.app',
-    'https://*.vercel.app/*'
-  );
-}
-
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Allow all Vercel domains in production
-    if (process.env.NODE_ENV === 'production' && origin.includes('vercel.app')) {
-      return callback(null, true);
-    }
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'],
   credentials: true
 }));
 
@@ -75,7 +35,10 @@ app.use(cors({
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.path === '/api/health'
 });
 app.use('/api/', limiter);
 
@@ -98,27 +61,6 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     message: 'Job Portal API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    cors: allowedOrigins,
-    vercel: true
-  });
-});
-
-// Simple test endpoint
-app.get('/api/test', (req, res) => {
-  res.status(200).json({ 
-    message: 'API is working!',
-    timestamp: new Date().toISOString(),
-    vercel: true
-  });
-});
-
-// Root endpoint for Vercel
-app.get('/', (req, res) => {
-  res.status(200).json({ 
-    message: 'Job Portal Backend API',
-    status: 'running',
     timestamp: new Date().toISOString()
   });
 });
@@ -127,7 +69,6 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/admin', adminRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -151,28 +92,17 @@ const startServer = async () => {
       await populateSampleData();
     }
     
-    // In production (Vercel), don't call app.listen()
-    if (process.env.NODE_ENV === 'production') {
-      console.log(`🚀 Server ready for production`);
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🔗 API URL: /api`);
-    } else {
-      app.listen(PORT, () => {
-        console.log(`🚀 Server running on port ${PORT}`);
-        console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-        console.log(`🔗 API URL: http://localhost:${PORT}/api`);
-      });
-    }
+      console.log(`🔗 API URL: http://localhost:${PORT}/api`);
+    });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);
   }
 };
 
-// Export for Vercel
-export default app;
+startServer();
 
-// Start server if not in production
-if (process.env.NODE_ENV !== 'production') {
-  startServer();
-} 
+export default app; 

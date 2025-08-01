@@ -12,23 +12,11 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    strictPort: false, // Allow Vite to find an available port
     proxy: {
       '/api': {
         target: 'http://localhost:5001',
         changeOrigin: true,
         secure: false,
-      },
-    },
-  },
-  build: {
-    sourcemap: false, // Completely disable source maps
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-        },
       },
     },
   },

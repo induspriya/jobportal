@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { Job, Application, ApiResponse } from '@/types'
 
-// Use direct backend URL for production, relative URL for development
-const API_BASE_URL = import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD ? 'https://jobportal-backend.vercel.app' : '/api')
+// Use relative URL for production (works with Vercel rewrites)
+// Use environment variable for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 // Create axios instance with default config
 const api = axios.create({

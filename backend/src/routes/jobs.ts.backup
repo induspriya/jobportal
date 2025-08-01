@@ -336,6 +336,60 @@ router.delete('/:id', protect, async (req: AuthRequest, res) => {
   }
 });
 
+// @route   GET /api/jobs/categories
+// @desc    Get all job categories
+// @access  Public
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = [
+      'Technology',
+      'Healthcare',
+      'Finance',
+      'Education',
+      'Marketing',
+      'Sales',
+      'Design',
+      'Engineering',
+      'Customer Service',
+      'Administration',
+      'Other'
+    ];
+
+    res.json({
+      success: true,
+      data: { categories }
+    });
+  } catch (error) {
+    console.error('Get categories error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching categories'
+    });
+  }
+});
+
+// @route   GET /api/jobs/my-jobs
+// @desc    Get jobs posted by current user
+// @access  Private (Employers only)
+router.get('/my-jobs', protect, authorize('employer', 'admin'), async (req: AuthRequest, res) => {
+  try {
+    const jobs = await Job.find({ postedBy: req.user!._id })
+      .populate('applications')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: { jobs }
+    });
+  } catch (error) {
+    console.error('Get my jobs error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching your jobs'
+    });
+  }
+});
+
 // @route   POST /api/jobs/:id/apply
 // @desc    Apply for a job
 // @access  Private

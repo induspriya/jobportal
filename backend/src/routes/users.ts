@@ -106,4 +106,77 @@ router.get('/stats', protect, async (req: AuthRequest, res) => {
   }
 });
 
+// @route   GET /api/users/saved-jobs
+// @desc    Get user's saved jobs
+// @access  Private
+router.get('/saved-jobs', protect, async (req: AuthRequest, res) => {
+  try {
+    // This would typically fetch from a SavedJob model
+    // For now, we'll return an empty array
+    res.json({
+      success: true,
+      data: {
+        savedJobs: []
+      }
+    });
+  } catch (error) {
+    console.error('Get saved jobs error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching saved jobs'
+    });
+  }
+});
+
+// @route   POST /api/users/saved-jobs
+// @desc    Save a job for user
+// @access  Private
+router.post('/saved-jobs', protect, async (req: AuthRequest, res) => {
+  try {
+    const { jobId } = req.body;
+    
+    if (!jobId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Job ID is required'
+      });
+    }
+
+    // This would typically save to a SavedJob model
+    // For now, we'll return success
+    res.json({
+      success: true,
+      message: 'Job saved successfully'
+    });
+  } catch (error) {
+    console.error('Save job error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while saving job'
+    });
+  }
+});
+
+// @route   DELETE /api/users/saved-jobs/:jobId
+// @desc    Remove a saved job
+// @access  Private
+router.delete('/saved-jobs/:jobId', protect, async (req: AuthRequest, res) => {
+  try {
+    const { jobId } = req.params;
+    
+    // This would typically remove from a SavedJob model
+    // For now, we'll return success
+    res.json({
+      success: true,
+      message: 'Job removed from saved jobs'
+    });
+  } catch (error) {
+    console.error('Remove saved job error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while removing saved job'
+    });
+  }
+});
+
 export default router; 

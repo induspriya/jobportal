@@ -2,22 +2,34 @@ import nodemailer from 'nodemailer';
 import { EmailData } from '../types';
 
 class EmailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    // Only create transporter if SMTP configuration is available
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      this.transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+    } else {
+      console.warn('⚠️ SMTP configuration not found. Email functionality will be disabled.');
+      this.transporter = null;
+    }
   }
 
   async sendEmail(emailData: EmailData): Promise<boolean> {
     try {
+      // Check if transporter is available
+      if (!this.transporter) {
+        console.warn('⚠️ Email service not configured. Skipping email send.');
+        return false;
+      }
+
       const mailOptions = {
         from: process.env.EMAIL_FROM || 'noreply@jobportal.com',
         to: emailData.to,

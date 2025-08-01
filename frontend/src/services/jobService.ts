@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Job, Application, ApiResponse } from '@/types'
 
-const API_BASE_URL = process.env.VITE_API_URL || '/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 // Create axios instance with default config
 const api = axios.create({

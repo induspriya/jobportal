@@ -179,8 +179,8 @@ export const jobService = {
   // Get all jobs
   async getJobs(filters?: any): Promise<Job[]> {
     try {
-      const response = await api.get<ApiResponse<Job[]>>('/jobs', { params: filters })
-      return response.data.data!
+      const response = await api.get<ApiResponse<{ jobs: Job[], pagination: any }>>('/jobs', { params: filters })
+      return response.data.data?.jobs || []
     } catch (error) {
       console.log('Using sample data for jobs')
       return sampleJobs
